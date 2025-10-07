@@ -7,6 +7,7 @@
 
 import Foundation
 import AVKit
+import AVFoundation
 
 class AudioPlayer: NSObject, AVAudioPlayerDelegate {
   
@@ -29,6 +30,14 @@ class AudioPlayer: NSObject, AVAudioPlayerDelegate {
   }
   
   func preparePlayer(_ path: String?, volume: Double?, updateFrequency: UpdateFrequency, time: Double, resolver resolve: RCTPromiseResolveBlock, rejecter reject: RCTPromiseRejectBlock) {
+    // Configure AVAudioSession for playback in silent mode
+    do {
+      try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [])
+      try AVAudioSession.sharedInstance().setActive(true)
+    } catch {
+      print("Failed to configure audio session: \(error)")
+    }
+    
     if(!(path ?? "").isEmpty) {
       self.updateFrequency = updateFrequency
       isComponentMounted = true
@@ -88,6 +97,14 @@ class AudioPlayer: NSObject, AVAudioPlayerDelegate {
   }
   
     func startPlayer(_ finishMode: Int?, speed: Float, result: RCTPromiseResolveBlock) {
+      // Ensure audio session is configured for playback in silent mode
+      do {
+        try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [])
+        try AVAudioSession.sharedInstance().setActive(true)
+      } catch {
+        print("Failed to configure audio session: \(error)")
+      }
+      
       if(finishMode != nil && finishMode == 0) {
         self.finishMode = FinishMode.loop
       } else if(finishMode != nil && finishMode == 1) {
